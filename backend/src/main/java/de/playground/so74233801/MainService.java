@@ -1,9 +1,12 @@
 package de.playground.so74233801;
 
+
+
 import java.util.Objects;
 
 
 public class MainService {
+
   private Service someService;
 
   public MainService(Service service) {
@@ -14,7 +17,8 @@ public class MainService {
     if (Objects.equals(flag, "flag1")) {
       throw new IllegalArgumentException("Oh no, exception!");
     }
-   boolean result = someService.execute(flag);
+    boolean result = someService.execute(flag);
+    //boolean result = true;
     if (result) {
       throw new IllegalArgumentException("Oh no, exception!");
     }

@@ -6,13 +6,16 @@ plugins {
 
 group = 'de.bodo'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+sourceCompatibility = '11'
 
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
 }
+println("java version: "+ JavaVersion.current())
+
+
 
 repositories {
     mavenCentral()
@@ -26,7 +29,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.mockito:mockito-core:4.8.1'
     testImplementation 'org.mockito:mockito-junit-jupiter:4.8.1'
-
+// https://mvnrepository.com/artifact/org.mockito/mockito-all
+    //testImplementation group: 'org.mockito', name: 'mockito-all', version: '2.0.2-beta'
 
 }
 

@@ -6,17 +6,22 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.stream.Stream;
 
 
 class MainTest {
-
+  Logger logger = LoggerFactory.getLogger(MainTest.class);
   private Service someService;
   private MainService serviceUnderTest;
   @BeforeEach
   void setup(){
-    this.someService = Mockito.mock(Service.class);
+    String version = System.getProperty("java.version");
+    logger.info("JavaVersion="+version);
+    Class<Service> clazz = Service.class;
+    this.someService = Mockito.mock(clazz);
     this.serviceUnderTest = new MainService(someService);
   }
 

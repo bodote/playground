@@ -63,7 +63,7 @@
 ##############################################################################
 
 # Attempt to set APP_HOME
-
+#JAVA_HOME=/Library/Java/JavaVirtualMachines/openjdk-11.jdk/Contents/Home/
 # Resolve links: $0 may be a link
 app_path=$0
 
