@@ -26,7 +26,7 @@ class MyControllerTest {
   @Test
   void myController() throws Exception {
     log.error("start-------------");
-    mockMvc.perform(get("/myentity")).andDo(MockMvcResultHandlers.print())
+    mockMvc.perform(get("/myentity")).andDo(MockMvcResultHandlers.log())
             .andExpect(jsonPath("$.id", Matchers.equalTo(1)))
             .andExpect(jsonPath("$.content", Matchers.equalTo("World")));
     log.debug("end-------------");
