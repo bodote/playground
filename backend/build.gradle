@@ -15,7 +15,9 @@ configurations {
 }
 println("java version: "+ JavaVersion.current())
 
-
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ['-Xlint:unchecked']
+}
 
 repositories {
     mavenCentral()
