@@ -2,6 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.7.5'
     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
     id 'java'
+    id 'idea'
 }
 
 group = 'de.bodo'
@@ -22,13 +23,21 @@ tasks.withType(JavaCompile) {
 repositories {
     mavenCentral()
 }
+idea {
+    module {
+        downloadJavadoc = true
+    }
+}
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-websocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket:2.7.5'
+
 
     implementation 'org.springdoc:springdoc-openapi-ui:1.6.12'
     compileOnly 'org.projectlombok:lombok'
-
+    implementation 'io.kubernetes:client-java:15.0.1'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     annotationProcessor 'org.projectlombok:lombok'

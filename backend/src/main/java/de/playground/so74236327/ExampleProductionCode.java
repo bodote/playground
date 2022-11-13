@@ -47,8 +47,8 @@ public class ExampleProductionCode {
         return ftask;
     }
     public void collectAsyncResults() {
+        ExampleProductionCode.EnginesData enginesData = this.getEngineData();
         futureData.forEach(result -> {
-            ExampleProductionCode.EnginesData enginesData = this.getEngineData();
             try {
                 enginesData.add(result.get()); // the method I am using to force an exception using Mockito
             } catch (InterruptedException | ExecutionException e) {

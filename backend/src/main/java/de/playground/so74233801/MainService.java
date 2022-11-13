@@ -2,9 +2,11 @@ package de.playground.so74233801;
 
 
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Objects;
 
-
+@Slf4j
 public class MainService {
 
   private Service someService;
