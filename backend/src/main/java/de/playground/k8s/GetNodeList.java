@@ -12,7 +12,7 @@ import io.kubernetes.client.util.KubeConfig;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class Example1 {
+public class GetNodeList {
     public static void main(String[] args) throws IOException, ApiException{
         // file path to your KubeConfig
 
