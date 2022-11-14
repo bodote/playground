@@ -130,9 +130,6 @@ public class WatchCustomResource {
               break;
             default:
               System.out.printf("Unknown event type: %s%n", event.type);
-              JsonNode unknown = mapper.valueToTree(event);
-              System.out.println("unknown event:"+unknown.toPrettyString());
-
           }
           System.out.println("-----END WATCH FOR LOOP----------------");
         }
