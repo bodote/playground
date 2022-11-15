@@ -3,6 +3,7 @@ package de.playground.k8s;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
@@ -18,7 +19,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class WatchCustomResource {
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, ApiException {
     String kubeConfigPath = System.getenv("HOME") + "/.kube/config-cluster-dev";
     ApiClient client = ClientBuilder.kubeconfig(KubeConfig.loadKubeConfig(new FileReader(kubeConfigPath))).build();
 
@@ -37,7 +38,7 @@ public class WatchCustomResource {
     String plural = "ingressroutes"; // String | The custom resource's plural name. For TPRs this would be lowercase
     // plural kind.
     String pretty = ""; // String | If 'true', then the output is pretty printed.
-    Boolean allowWatchBookmarks = false; // Boolean | allowWatchBookmarks requests watch events with type \"BOOKMARK\"
+    Boolean allowWatchBookmarks = true; // Boolean | allowWatchBookmarks requests watch events with type \"BOOKMARK\"
     // . Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server's
     // discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the
     // server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored. If the
@@ -81,13 +82,34 @@ public class WatchCustomResource {
     // resourceVersion is
     // set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions
     // for details.  Defaults to unset
-    Integer timeoutSeconds = 15; // Integer | Timeout for the list/watch call. This limits the duration of the call,
+    Integer timeoutSeconds = 40; // Integer | Timeout for the list/watch call. This limits the duration of the call,
     // regardless of any activity or inactivity.
     Boolean watchFlag = true; // Boolean | Watch for changes to the described resources and return them as a stream of
     // add, update, and remove notifications.
 
 
     final ObjectMapper mapper = new ObjectMapper(new JsonFactory());
+    LinkedTreeMap result = (LinkedTreeMap) apiInstance.listClusterCustomObject(group, version,
+            plural, "false", allowWatchBookmarks, _continue, fieldSelector, labelSelector, limit, resourceVersion,
+            resourceVersionMatch, timeoutSeconds, false);
+    JsonNode rootNode = mapper.valueToTree(result);
+    System.out.println("resourceVersion:"+rootNode.get("metadata").get("resourceVersion"));
+    resourceVersion = rootNode.get("metadata").get("resourceVersion").asText();
+    JsonNode items = rootNode.get("items");
+    for (JsonNode item : items) {
+      JsonNode spec = item.get("spec");
+      JsonNode namespace = item.get("metadata").get("namespace");
+      if (namespace.toString().contains("webapps") || namespace.toString().contains("default")) {
+        System.out.println("namespace:" + namespace);
+        if (spec.get("tls") != null) {
+          JsonNode tls = spec.get("tls");
+          JsonNode domains = tls.get("domains");
+          for (JsonNode domain : domains) {
+            System.out.println("domain:" + domain);
+          }
+        }
+      }
+    }
     //create JsonNode from json String
     Watch.Response<Object> previouseEvent =null;
     while (true) {
@@ -99,7 +121,7 @@ public class WatchCustomResource {
         for (Watch.Response<Object> event : watch) {
           System.out.printf("+++++" + new Date() + "\n");
           Object customObject = event.object;
-          final JsonNode rootNode = mapper.valueToTree(customObject);
+          rootNode = mapper.valueToTree(customObject);
 
           JsonNode tls = (rootNode.get("spec")!=null)?rootNode.get("spec").get("tls"):null;
           if (tls!=null){

@@ -45,11 +45,11 @@ public class GetCustomResources {
 
             //create JsonNode from json String
             final JsonNode rootNode = mapper.valueToTree(result);
-            ;
+            System.out.println("resourceVersion:"+rootNode.get("metadata").get("resourceVersion"));
             System.out.println(rootNode.toPrettyString());
             System.out.println("---------------------");
             JsonNode items = rootNode.get("items");
-
+            rootNode.get("metadata").get("resourceVersion");
 
             for (JsonNode item : items) {
                 JsonNode spec = item.get("spec");
