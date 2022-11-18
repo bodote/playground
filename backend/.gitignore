@@ -38,3 +38,7 @@ out/
 ### VS Code ###
 .vscode/
 /java_pid96027.hprof
+/src/test/resources/eventADDED.json
+/src/test/resources/eventBOOKMARK.json
+/src/test/resources/eventDELETED.json
+/test-ingres.yaml

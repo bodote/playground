@@ -1,9 +1,8 @@
 package de.playground.rest1;
 
-import de.playground.LoggingConfiguration;
+import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -15,13 +14,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(controllers = MyController.class)
-@ContextConfiguration(classes = { LoggingConfiguration.class,MyController.class })
+@ContextConfiguration(classes = { MyController.class })
 @TestPropertySource(locations  =  "/application.properties")
+@Slf4j
 class MyControllerTest {
   @Autowired
   private MockMvc mockMvc;
-  @Autowired
-  Logger log;
+
 
   @Test
   void myController() throws Exception {

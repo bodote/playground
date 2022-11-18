@@ -13,6 +13,7 @@ import io.kubernetes.client.util.ClientBuilder;
 import io.kubernetes.client.util.KubeConfig;
 
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 // kubectl get ingressroutes  -o yaml
@@ -47,6 +48,17 @@ public class GetCustomResources {
             final JsonNode rootNode = mapper.valueToTree(result);
             System.out.println("resourceVersion:"+rootNode.get("metadata").get("resourceVersion"));
             System.out.println(rootNode.toPrettyString());
+            FileWriter file =new FileWriter(System.getenv("HOME") + "/dev/learning/playground/traefik-list.json");
+            try {
+                // Constructs a FileWriter given a file name, using the platform's default charset
+                file.write(rootNode.toPrettyString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                file.flush();
+                file.close();
+            }
+
             System.out.println("---------------------");
             JsonNode items = rootNode.get("items");
             rootNode.get("metadata").get("resourceVersion");
@@ -62,6 +74,9 @@ public class GetCustomResources {
                         for (JsonNode domain : domains) {
                             System.out.println("domain:" + domain);
                         }
+                    } else if (spec.get("routes")!=null){
+                        JsonNode routes = spec.get("routes");
+                        System.out.println("route:match:" +  routes.get(0).get("match").asText());
                     }
                 }
             }

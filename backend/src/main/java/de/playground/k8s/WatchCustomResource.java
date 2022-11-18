@@ -13,8 +13,8 @@ import io.kubernetes.client.util.KubeConfig;
 import io.kubernetes.client.util.Watch;
 import okhttp3.OkHttpClient;
 
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -82,31 +82,29 @@ public class WatchCustomResource {
     // resourceVersion is
     // set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions
     // for details.  Defaults to unset
-    Integer timeoutSeconds = 40; // Integer | Timeout for the list/watch call. This limits the duration of the call,
+    Integer timeoutSeconds = 6; // Integer | Timeout for the list/watch call. This limits the duration of the call,
     // regardless of any activity or inactivity.
     Boolean watchFlag = true; // Boolean | Watch for changes to the described resources and return them as a stream of
     // add, update, and remove notifications.
 
 
     final ObjectMapper mapper = new ObjectMapper(new JsonFactory());
-    LinkedTreeMap result = (LinkedTreeMap) apiInstance.listClusterCustomObject(group, version,
-            plural, "false", allowWatchBookmarks, _continue, fieldSelector, labelSelector, limit, resourceVersion,
-            resourceVersionMatch, timeoutSeconds, false);
-    JsonNode rootNode = mapper.valueToTree(result);
-    System.out.println("resourceVersion:"+rootNode.get("metadata").get("resourceVersion"));
-    resourceVersion = rootNode.get("metadata").get("resourceVersion").asText();
-    JsonNode items = rootNode.get("items");
-    for (JsonNode item : items) {
-      JsonNode spec = item.get("spec");
-      JsonNode namespace = item.get("metadata").get("namespace");
-      if (namespace.toString().contains("webapps") || namespace.toString().contains("default")) {
-        System.out.println("namespace:" + namespace);
-        if (spec.get("tls") != null) {
-          JsonNode tls = spec.get("tls");
-          JsonNode domains = tls.get("domains");
-          for (JsonNode domain : domains) {
-            System.out.println("domain:" + domain);
-          }
+    String filePath = "backend/src/test/resources/";
+    JsonNode rootNode = null;
+    while (resourceVersion == null ) {
+      try {
+        LinkedTreeMap result = (LinkedTreeMap) apiInstance.listClusterCustomObject(group, version, plural, "false", allowWatchBookmarks, _continue, fieldSelector, labelSelector, limit, resourceVersion, resourceVersionMatch, timeoutSeconds, false);
+        String filename = filePath+"initialLinkedTreeMap.json";
+        writeTestFile(result, filename,mapper);
+        JsonNode result2 = readTestFile(filename,mapper);
+        resourceVersion = extractDomainsFromJson(result2);
+      } catch (Exception e) {
+        System.err.println("Exception when calling CustomObjectsApi#listClusterCustomObject");
+        e.printStackTrace();
+        try {
+          Thread.sleep(5000);
+        } catch (InterruptedException ex) {
+          throw new RuntimeException(ex);
         }
       }
     }
@@ -120,38 +118,13 @@ public class WatchCustomResource {
       }.getType())) {
         for (Watch.Response<Object> event : watch) {
           System.out.printf("+++++" + new Date() + "\n");
-          Object customObject = event.object;
-          rootNode = mapper.valueToTree(customObject);
-
-          JsonNode tls = (rootNode.get("spec")!=null)?rootNode.get("spec").get("tls"):null;
-          if (tls!=null){
-            for(JsonNode dom: tls.get("domains")){
-              System.out.println("domain:main:"+dom.get("main").toPrettyString());
-            }
-          }
-          JsonNode meta = rootNode.get("metadata");
-          if (meta!=null) {
-            resourceVersion = rootNode.get("metadata").get("resourceVersion").asText();
-            System.out.println("resourceVersion:" + resourceVersion);
-          } else {
+          String filename = filePath+"event"+event.type+".json";
+          writeEventTestFile(event, filename,mapper);
+          JsonNode eventJson = readEventTestFile(filename,mapper);
+          resourceVersion = extractChangedDomainsFromJson(eventJson);
+          if (resourceVersion==null) {
             JsonNode unknown = mapper.valueToTree(event);
             System.out.println("no metadata, instead:"+unknown.toPrettyString());
-            if (previouseEvent!=null){
-              System.out.println("previouse:"+mapper.valueToTree(previouseEvent).toPrettyString());
-            }
-          }
-          previouseEvent=event;
-          switch (event.type) {
-            case "BOOKMARK":
-              System.out.println("----BOOKMARK------");
-              break;
-            case "ADDED":
-            case "MODIFIED":
-            case "DELETED":
-              System.out.printf("----ADD/MOD/DEL------ %s%n", event.type);
-              break;
-            default:
-              System.out.printf("Unknown event type: %s%n", event.type);
           }
           System.out.println("-----END WATCH FOR LOOP----------------");
         }
@@ -162,7 +135,103 @@ public class WatchCustomResource {
         System.err.println("Reason: " + e.getResponseBody());
         System.err.println("Response headers: " + e.getResponseHeaders());
         e.printStackTrace();
+        try {
+          Thread.sleep(5000);
+        } catch (InterruptedException ex) {
+          throw new RuntimeException(ex);
+        }
+      } catch (RuntimeException | ClassNotFoundException e ){
+        System.err.println("Exception when calling CustomObjectsApi#listClusterCustomObject");
+        e.printStackTrace();
+        try {
+          Thread.sleep(5000);
+        } catch (InterruptedException ex) {
+          throw new RuntimeException(ex);
+        }
       }
     }
+  }
+
+  private static JsonNode readTestFile(String filename,ObjectMapper mapper) throws IOException,
+          ClassNotFoundException {
+    JsonNode result;
+    result = mapper.readValue(Paths.get(filename).toFile(), JsonNode.class);
+    return result;
+  }
+
+  private static void writeTestFile(LinkedTreeMap result, String filename,ObjectMapper mapper) throws IOException {
+
+    mapper.writeValue(Paths.get(filename).toFile(), result);
+  }
+
+  private static JsonNode readEventTestFile(String filename,ObjectMapper mapper) throws IOException,
+          ClassNotFoundException {
+   JsonNode result;
+    result = mapper.readValue(Paths.get(filename).toFile(), JsonNode.class);
+    return result;
+  }
+
+  private static void writeEventTestFile(Watch.Response<Object> event,String filename,ObjectMapper mapper) throws IOException {
+    mapper.writeValue(Paths.get(filename).toFile(), event);
+  }
+  private static String extractDomainsFromJson(JsonNode rootNode){
+    System.out.println("resourceVersion:" + rootNode.get("metadata").get("resourceVersion"));
+    String resourceVersion = rootNode.get("metadata").get("resourceVersion").asText();
+    JsonNode items = rootNode.get("items");
+    for (JsonNode item : items) {
+      JsonNode spec = item.get("spec");
+      JsonNode namespace = item.get("metadata").get("namespace");
+      if (namespace.toString().contains("webapps") || namespace.toString().contains("default")) {
+        System.out.println("namespace:" + namespace);
+        if (spec.get("tls") != null) {
+          JsonNode tls = spec.get("tls");
+          JsonNode domains = tls.get("domains");
+          for (JsonNode domain : domains) {
+            System.out.println("domain:" + domain);
+          }
+        } else if (spec.get("routes") != null) {
+          JsonNode routes = spec.get("routes");
+          System.out.println("route:match:" + routes.get(0).get("match").asText());
+        }
+      }
+    }
+    return resourceVersion;
+  }
+  private static String  extractChangedDomainsFromJson(JsonNode eventJson){
+    JsonNode rootNode = eventJson.get("object");
+    JsonNode spec = rootNode.get("spec");
+    if (spec != null ) {
+      JsonNode tls = (spec.get("tls") );
+      if (tls != null) {
+        for (JsonNode dom : tls.get("domains")) {
+          System.out.println("domain:main:" + dom.get("main").toPrettyString());
+        }
+      } else if (spec.get("routes") != null) {
+        JsonNode routes = spec.get("routes");
+        System.out.println("route:match:" + routes.get(0).get("match").asText());
+      }
+    }
+    JsonNode meta = rootNode.get("metadata");
+    String resourceVersion=null;
+    if (meta!=null) {
+      resourceVersion = rootNode.get("metadata").get("resourceVersion").asText();
+      System.out.println("resourceVersion:" + resourceVersion);
+    }
+    String eventType = eventJson.get("type").asText();
+    switch (eventType) {
+      case "BOOKMARK":
+        System.out.println("----BOOKMARK------");
+        break;
+      case "ADDED":
+        System.out.printf("----ADD------ %s%n", eventType);
+        break;
+      case "MODIFIED":
+      case "DELETED":
+        System.out.printf("----MOD/DEL------ %s%n", eventType);
+        break;
+      default:
+        System.out.printf("Unknown event type: %s%n", eventType);
+    }
+    return resourceVersion;
   }
 }
