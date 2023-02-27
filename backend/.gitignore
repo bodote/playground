@@ -5,7 +5,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 frontend/.npm/
-/src/main/resources/static/
+
 
 ### STS ###
 .apt_generated
@@ -42,3 +42,7 @@ out/
 /src/test/resources/eventBOOKMARK.json
 /src/test/resources/eventDELETED.json
 /test-ingres.yaml
+/src/test/resources/initialLinkedTreeMap.json
+/src/main/resources/static/js/sockjs-0.3.4.js
+/src/main/resources/static/js/stomp.js
+/src/main/resources/static/js/webSocketSendToUserApp.js

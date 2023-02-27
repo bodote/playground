@@ -1,11 +1,27 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.owasp:dependency-check-gradle:7.3.2'
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.9.11'
+    }
+}
+
 plugins {
     id 'org.springframework.boot' version '2.7.5'
     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
     id 'java'
     id 'idea'
+    id 'jacoco'
+    //id 'info.solidsoft.pitest' version '1.9.11'
 }
 
-group = 'de.bodo'
+apply plugin: 'org.owasp.dependencycheck'
+apply plugin: 'info.solidsoft.pitest'
+
+
+group = 'de.playground'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 
@@ -15,7 +31,29 @@ configurations {
     }
 }
 println("java version: "+ JavaVersion.current())
+println("projekt.group:"+project.group)
+pitest {
+    //adds dependency to org.pitest:pitest-junit5-plugin and sets "testPlugin" to "junit5"
+    //targetClasses = ['de.*']
+    junit5PluginVersion = '1.1.0'
+    pitestVersion = '1.10.0'
+    testSourceSets = [sourceSets.test]
+    mainSourceSets = [sourceSets.main]
+}
 
+test {
+    finalizedBy jacocoTestReport // report is always generated after tests run
+}
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+}
+jacocoTestReport {
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+}
 tasks.withType(JavaCompile) {
     options.compilerArgs += ['-Xlint:unchecked']
 }
@@ -33,11 +71,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-websocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket:2.7.5'
+    implementation 'org.owasp:dependency-check-gradle:7.3.2'
 
 
     implementation 'org.springdoc:springdoc-openapi-ui:1.6.12'
     testImplementation 'org.projectlombok:lombok:1.18.22'
     compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
     implementation 'io.kubernetes:client-java:15.0.1'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web
@@ -57,3 +98,4 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+

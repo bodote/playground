@@ -15,25 +15,24 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MyActuator {
 
   public MyActuator(){
-    features.put("bodo",new Feature("true","other"));
+    features.put("bodo","te");
   }
 
-  private Map<String, Feature> features = new ConcurrentHashMap<>();
+  private Map<String, String> features = new ConcurrentHashMap<>();
 
-  @ReadOperation
-  public Map<String, Feature> features() {
-    return features;
-  }
 
-  @ReadOperation
-  public Feature feature(@Selector String name) {
+  @ReadOperation(produces="application/json")
+  public Object feature(@Selector String name) {
+    if (name.equals("features")) return features;
     return features.get(name);
   }
 
   @WriteOperation
-  public void configureFeature(@Selector String name, Feature feature) {
-    log.info("name/feature:"+name+ "/"+feature.toString());
-    //features.put(name, feature.toString());
+  public void configureFeature(@Selector String name, String feature1, String feature2 ) {
+    features.put("feature1",feature1);
+    features.put("feature2",feature2);
+    log.info("name/feature1:"+name+ "/"+ features.get("feature1"));
+    log.info("name/feature2:"+name+ "/"+ features.get("feature2"));
   }
 
 
@@ -47,7 +46,6 @@ public class MyActuator {
 @Data
 @AllArgsConstructor
   public static class Feature {
-    //private boolean enabled;
     private String configuredLevel;
     private String otherParam;
 
