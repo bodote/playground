@@ -3,7 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/de.playground.playground.main.iml" filepath="$PROJECT_DIR$/.idea/modules/de.playground.playground.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/de.playground.playground.main~1.iml" filepath="$PROJECT_DIR$/.idea/modules/de.playground.playground.main~1.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/de.playground.playground.test.iml" filepath="$PROJECT_DIR$/.idea/modules/de.playground.playground.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/de.playground.playground.test~1.iml" filepath="$PROJECT_DIR$/.idea/modules/de.playground.playground.test~1.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/playground.iml" filepath="$PROJECT_DIR$/.idea/playground.iml" />
     </modules>
   </component>

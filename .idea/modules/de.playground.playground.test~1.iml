@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module version="4">
-  <component name="NewModuleRootManager">
+  <component name="AdditionalModuleElements">
     <content url="file://$MODULE_DIR$/../../backend/build/generated/sources/annotationProcessor/java/test">
       <sourceFolder url="file://$MODULE_DIR$/../../backend/build/generated/sources/annotationProcessor/java/test" isTestSource="true" generated="true" />
     </content>
   </component>
   <component name="SonarLintModuleSettings">
-    <option name="uniqueId" value="6445025f-c495-46f7-a4a0-314b2cce1d07" />
+    <option name="uniqueId" value="3539f616-cbfe-47b7-9737-b07642568fa4" />
   </component>
 </module>
