@@ -1,4 +1,4 @@
-package de.playground.folderFunctional;
+package de.playground.functional_folders;
 
 import java.util.List;
 
