@@ -17,6 +17,8 @@ public class Compare {
 
   public static void printPeople(final String message, final List<Person> people) {
     log.info(message);
-    people.forEach(msg -> log.info(msg.toString()));
+    for (int i = 0; i < people.size(); i++) {
+      log.info(people.get(i).toString());
+    }
   }
 }
